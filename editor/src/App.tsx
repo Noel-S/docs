@@ -4,13 +4,22 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/componen
 import { FontBoldIcon, FontItalicIcon, UnderlineIcon } from '@radix-ui/react-icons'
 import { ThemeProvider } from '@/components/theme-provider'
 import CodeEditor from '@uiw/react-textarea-code-editor'
-// import markdownit from 'markdown-it'
-import { useRef } from 'react'
-// const md = markdownit()
-import { marked } from 'marked'
+import { useMemo, useRef } from 'react'
+import { remark } from 'remark'
+import remarkGfm from 'remark-gfm'
+import remarkSmartypants from 'remark-smartypants'
+import remarkHtml from 'remark-html'
+import { rehype } from 'rehype'
+import rehypeShiki from '@shikijs/rehype'
 
 function App() {
   const htmlRef = useRef<HTMLDivElement>(null)
+  const parser = useMemo(() => {
+    return remark().use(remarkGfm).use(remarkSmartypants).use(remarkHtml)
+  }, [])
+  const htmlparser = useMemo(() => {
+    return rehype().use(rehypeShiki, { theme: 'tokyo-night' })
+  }, [])
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <main className='main'>
@@ -21,9 +30,11 @@ function App() {
               language="markdown"
               placeholder="Please enter JS code."
               onChange={(evn) => {
-                marked.parse(evn.target.value, { async: true }).then((html) => {
-                  htmlRef.current!.innerHTML = html
-                });
+                parser.process(evn.target.value).then((file) => {
+                  htmlparser.process(file).then((file) => {
+                    htmlRef.current!.innerHTML = String(file)
+                  })
+                })
               }}
               padding={15}
               style={{
@@ -47,9 +58,8 @@ function App() {
             </section>
           </ResizablePanel>
           <ResizableHandle withHandle />
-          <ResizablePanel>
-            <section ref={htmlRef} >
-
+          <ResizablePanel minSize={40} style={{overflowY: 'auto'}}>
+            <section ref={htmlRef} className='sl-markdown-content' >
             </section>
           </ResizablePanel>
         </ResizablePanelGroup>
