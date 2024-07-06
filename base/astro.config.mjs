@@ -9,6 +9,9 @@ export default defineConfig({
 			social: {
 				github: 'https://github.com/withastro/starlight',
 			},
+			editLink: {
+				baseUrl: 'http://localhost:3000/edit/'
+			},
 			sidebar: [
 				{
 					label: 'Guides',
