@@ -10,4 +10,9 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  base: '/edit/',
+  // build: {
+  //   outDir: '../base/dist/edit',
+  //   emptyOutDir: true,
+  // }
 })
