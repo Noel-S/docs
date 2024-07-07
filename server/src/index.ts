@@ -1,11 +1,13 @@
-import { readableStreamToText } from 'bun';
 import { Hono } from 'hono'
 import { serveStatic } from 'hono/bun'
 import { unlink } from "node:fs/promises";
 
 const app = new Hono()
 
-app.get('/edit/:filename{.+\\.mdx{0,1}$}', serveStatic({ root: '../base/dist/edit', path: '/index.html' }))
+app.get('/edit/:filename{.+\\.mdx{0,1}$}', serveStatic({ root: '../base/dist/edit', path: '/index.html', rewriteRequestPath(path) {
+  console.log(path)
+  return path
+}, }))
 
 app.use('/*', serveStatic({ root: '../base/dist' }))
 
@@ -30,17 +32,38 @@ app.post('/save', async (c) => {
 
 app.post('/publish', async (c) => {
   try {
-    const { exited } = Bun.spawn(['npm', 'run', 'astro', 'build'], { cwd: '../base' })
-    const code = await exited
-    if (code !== 0) {
+    // build editor and base
+    const { exited: baseBuildCode } = Bun.spawn(['npm', 'run', 'astro', 'build'], { cwd: '../base' })
+    const base = await baseBuildCode
+    if (base !== 0) {
       return c.json({ status: 'error' })
     }
-    Bun.spawn(['git', 'add', '.'], { cwd: '../' }).exited.then(() => {
-      Bun.spawn(['git', 'commit', '-m', 'published'], { cwd: '../' }).exited.then(() => {
-        Bun.spawn(['git', 'push'], { cwd: '../' }).exited
-      })
-    })
-    console.log('published')
+
+    const { exited: editorBuildCode } = Bun.spawn(['npm', 'run', 'build'], { cwd: '../editor' })
+    const editor = await editorBuildCode
+    if (editor !== 0) {
+      return c.json({ status: 'error' })
+    }
+
+    // publish to github
+    const { exited: gitAddCode } = Bun.spawn(['git', 'add', '.'], { cwd: '../' })
+    const gitAdd = await gitAddCode
+    if (gitAdd !== 0) {
+      return c.json({ status: 'error' })
+    }
+
+    const { exited: gitCommitCode } = Bun.spawn(['git', 'commit', '-m', 'published docs files'], { cwd: '../' })
+    const gitCommit = await gitCommitCode
+    if (gitCommit !== 0) {
+      return c.json({ status: 'error' })
+    }
+
+    const { exited: gitPushCode } = Bun.spawn(['git', 'push'], { cwd: '../' })
+    const gitPush = await gitPushCode
+    if (gitPush !== 0) {
+      return c.json({ status: 'error' })
+    }
+    
     return c.json({ status: 'ok' })
   } catch (error: any) {
     return c.json({ status: 'error', error: error.message })
