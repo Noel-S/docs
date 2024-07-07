@@ -48,10 +48,10 @@ app.post('/publish', async (c) => {
     // publish to github
     const { exited: gitAddCode } = Bun.spawn(['git', 'add', '.'], { cwd: '../' })
     const gitAdd = await gitAddCode
-    if (gitAdd !== 0) {
+    if (gitAdd === 0) {
       const { exited: gitCommitCode } = Bun.spawn(['git', 'commit', '-m', 'published docs files'], { cwd: '../' })
       const gitCommit = await gitCommitCode
-      if (gitCommit !== 0) {
+      if (gitCommit === 0) {
         const { exited: gitPushCode } = Bun.spawn(['git', 'push'], { cwd: '../' })
         const gitPush = await gitPushCode
         if (gitPush !== 0) {
