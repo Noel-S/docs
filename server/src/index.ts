@@ -4,13 +4,7 @@ import { unlink } from "node:fs/promises";
 
 const app = new Hono()
 
-app.use('/edit/*', serveStatic({ root: '../editor/dist', rewriteRequestPath(path) {
-  return path.replace(/^\/edit/, '')
-}, }))
-
-app.get('/edit/:filename{.+\\.mdx{0,1}$}', serveStatic({ root: '../editor/dist', path: '/index.html', rewriteRequestPath(path) {
-  return path.replace(/^\/edit/, '')
-}}))
+app.get('/edit/:filename{.+\\.mdx{0,1}$}', serveStatic({ root: '../base/dist/edit', path: '/index.html' }))
 
 app.use('/*', serveStatic({ root: '../base/dist' }))
 
