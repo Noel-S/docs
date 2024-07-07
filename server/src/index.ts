@@ -41,7 +41,6 @@ app.post('/publish', async (c) => {
 
     const { exited: editorBuildCode } = Bun.spawn(['npm', 'run', 'build'], { cwd: '../editor' })
     const editor = await editorBuildCode
-    console.log(editor)
     if (editor !== 0) {
       return c.json({ status: 'error' })
     }
@@ -50,21 +49,16 @@ app.post('/publish', async (c) => {
     const { exited: gitAddCode } = Bun.spawn(['git', 'add', '.'], { cwd: '../' })
     const gitAdd = await gitAddCode
     if (gitAdd !== 0) {
-      return c.json({ status: 'error' })
+      const { exited: gitCommitCode } = Bun.spawn(['git', 'commit', '-m', 'published docs files'], { cwd: '../' })
+      const gitCommit = await gitCommitCode
+      if (gitCommit !== 0) {
+        const { exited: gitPushCode } = Bun.spawn(['git', 'push'], { cwd: '../' })
+        const gitPush = await gitPushCode
+        if (gitPush !== 0) {
+          return c.json({ status: 'error' })
+        }
+      }
     }
-
-    const { exited: gitCommitCode } = Bun.spawn(['git', 'commit', '-m', 'published docs files'], { cwd: '../' })
-    const gitCommit = await gitCommitCode
-    if (gitCommit !== 0) {
-      return c.json({ status: 'error' })
-    }
-
-    const { exited: gitPushCode } = Bun.spawn(['git', 'push'], { cwd: '../' })
-    const gitPush = await gitPushCode
-    if (gitPush !== 0) {
-      return c.json({ status: 'error' })
-    }
-    
     return c.json({ status: 'ok' })
   } catch (error: any) {
     return c.json({ status: 'error', error: error.message })
