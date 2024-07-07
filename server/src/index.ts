@@ -41,6 +41,7 @@ app.post('/publish', async (c) => {
 
     const { exited: editorBuildCode } = Bun.spawn(['npm', 'run', 'build'], { cwd: '../editor' })
     const editor = await editorBuildCode
+    console.log(editor)
     if (editor !== 0) {
       return c.json({ status: 'error' })
     }
