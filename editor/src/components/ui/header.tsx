@@ -1,5 +1,5 @@
 import { Button } from './button'
-import { CopyIcon, DotsHorizontalIcon, GlobeIcon, Pencil2Icon, PlusIcon, TrashIcon } from '@radix-ui/react-icons'
+import { CopyIcon, DotsHorizontalIcon, GlobeIcon, Pencil2Icon, PlusIcon, TrashIcon, UploadIcon } from '@radix-ui/react-icons'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from './dropdown-menu'
 import { Breadcrumb, BreadcrumbEllipsis, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from './breadcrumb'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './dialog'
@@ -84,6 +84,9 @@ export default function Header() {
         </Dialog>
         <Button variant="secondary" size="icon">
           <CopyIcon className="h-4 w-4" />
+        </Button>
+        <Button variant="secondary" size="icon">
+          <UploadIcon className="h-4 w-4" />
         </Button>
       </div>
       <div className='flex gap-2'>
