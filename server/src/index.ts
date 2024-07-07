@@ -1,3 +1,4 @@
+import { readableStreamToText } from 'bun';
 import { Hono } from 'hono'
 import { serveStatic } from 'hono/bun'
 import { unlink } from "node:fs/promises";
@@ -29,10 +30,16 @@ app.post('/save', async (c) => {
 
 app.post('/publish', async (c) => {
   try {
-    const { stderr } = Bun.spawn(['npm', 'run', 'astro', 'build'], { cwd: '../base' })
-    if (stderr) {
+    const { exited } = Bun.spawn(['npm', 'run', 'astro', 'build'], { cwd: '../base' })
+    const code = await exited
+    if (code !== 0) {
       return c.json({ status: 'error' })
     }
+    Bun.spawn(['git', 'add', '.'], { cwd: '../' }).exited.then(() => {
+      Bun.spawn(['git', 'commit', '-m', 'published'], { cwd: '../' }).exited.then(() => {
+        Bun.spawn(['git', 'push'], { cwd: '../' }).exited
+      })
+    })
     console.log('published')
     return c.json({ status: 'ok' })
   } catch (error: any) {
