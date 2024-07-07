@@ -8,6 +8,7 @@ import { Input } from './input'
 import { Label } from './label'
 import { ToggleGroup, ToggleGroupItem } from './toggle-group'
 import { Separator } from './separator'
+import { toast } from 'sonner'
 
 export type HeaderProps = {
   onSave: () => void
@@ -108,7 +109,22 @@ export default function Header({ onSave }: HeaderProps ) {
               <span>Create</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => {
+              fetch('/publish', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                }
+              }).then((res) => res.json()).then((data) => {
+                if (data.status === 'error') {
+                  toast("Error publishing file")
+                  return
+                }
+                toast("File published", {
+                  description: "The file was published correctly",
+                })
+              })
+            }}>
               <GlobeIcon className="mr-2 h-4 w-4" />
               <span>Publish</span>
             </DropdownMenuItem>
