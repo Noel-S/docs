@@ -9,7 +9,11 @@ import { Label } from './label'
 import { ToggleGroup, ToggleGroupItem } from './toggle-group'
 import { Separator } from './separator'
 
-export default function Header() {
+export type HeaderProps = {
+  onSave: () => void
+}
+
+export default function Header({ onSave }: HeaderProps ) {
   return (
     <header className='flex items-center justify-between p-3'>
       <div className='flex items-center gap-2'>
@@ -91,7 +95,7 @@ export default function Header() {
       </div>
       <div className='flex gap-2'>
         {/* <Button variant="secondary">Preview</Button> */}
-        <Button variant="default">Save</Button>
+        <Button variant="default" onClick={onSave}>Save</Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="secondary" size="icon">

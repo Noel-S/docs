@@ -5,15 +5,19 @@ import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror'
 import { tokyoNight } from "@uiw/codemirror-theme-tokyo-night"
 import { langs } from '@uiw/codemirror-extensions-langs'
 import { useEffect, useMemo, useRef } from 'react'
-import { remark } from 'remark'
+import rehypeStringify from 'rehype-stringify'
+import remarkRehype from 'remark-rehype'
 import remarkGfm from 'remark-gfm'
+import remarkFrontmatter from 'remark-frontmatter'
+import remarkParse from 'remark-parse'
 import remarkSmartypants from 'remark-smartypants'
-import remarkHtml from 'remark-html'
-import { rehype } from 'rehype'
 import rehypeShiki from '@shikijs/rehype'
 import Sidebar from './components/ui/sidebar'
 import { Separator } from './components/ui/separator'
 import Header from './components/ui/header'
+import { remark } from 'remark'
+import { Toaster } from './components/ui/sonner'
+import { toast } from 'sonner'
 
 function App() {
   const pathRef = useRef<string|null>(null)
@@ -21,17 +25,19 @@ function App() {
   const htmlRef = useRef<HTMLDivElement>(null)
 
   const markdownparser = useMemo(() => {
-    return remark().use(remarkGfm).use(remarkSmartypants).use(remarkHtml)
-  }, [])
-
-  const htmlparser = useMemo(() => {
-    return rehype().use(rehypeShiki, { theme: 'tokyo-night' })
+    return remark()
+      .use(remarkParse)
+      .use(remarkFrontmatter)
+      .use(remarkGfm)
+      .use(remarkSmartypants)
+      .use(remarkRehype)
+      .use(rehypeStringify)
+      .use(rehypeShiki, { theme: 'tokyo-night' })
   }, [])
 
   useEffect(() => {
     if (!markdownRef.current) return
     if (!htmlRef.current) return
-    if (!htmlparser) return
     if (!markdownparser) return
     if (!window) return
 
@@ -42,12 +48,36 @@ function App() {
         markdownRef.current!.view?.dispatch({ changes: { from: 0, to: 0, insert }})
       })
     }
-  }, [htmlparser, markdownparser])
+  }, [markdownparser])
 
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <main className='main'>
-        <Header />
+        <Header onSave={() => {
+          if (!pathRef.current) return
+          fetch('/save', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              old_file: null,
+              new_file: pathRef.current,
+              move: false,
+              content: markdownRef.current!.view?.state.doc.toString()
+            })
+          }).then((res) => res.json()).then((data) => {
+            if (data.status === 'error') {
+              toast("Error saving file", {
+                description: data.error,
+              })
+              return
+            }
+            toast("File saved", {
+              description: "The file was saved correctly",
+            })
+          })
+        }} />
         <Separator />
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel>
@@ -62,9 +92,7 @@ function App() {
                 theme={tokyoNight}
                 onChange={(value) => {
                   markdownparser.process(value).then((file) => {
-                    htmlparser.process(file).then((file) => {
-                      htmlRef.current!.innerHTML = String(file)
-                    })
+                    htmlRef.current!.innerHTML = String(file)
                   })
                 }}
               />
@@ -76,6 +104,7 @@ function App() {
           </ResizablePanel>
         </ResizablePanelGroup>
       </main>
+      <Toaster />
     </ThemeProvider>
   )
 }
