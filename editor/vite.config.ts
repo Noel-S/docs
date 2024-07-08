@@ -13,7 +13,7 @@ export default defineConfig({
   },
   base: '/edit/',
   build: {
-    outDir: '../base/dist/edit',
+    // outDir: '../base/dist/edit',
     emptyOutDir: true,
   }
 })
