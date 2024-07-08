@@ -1,4 +1,4 @@
-import './App.css'
+import app from './App.module.css'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
 import { ThemeProvider } from '@/components/theme-provider'
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror'
@@ -52,7 +52,11 @@ function App() {
 
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <main className='main'>
+      <main style={{
+        height: '100dvh',
+        display: 'flex',
+        flexDirection: 'column',
+      }}>
         <Header onSave={() => {
           if (!pathRef.current) return
           fetch('/save', {
@@ -100,7 +104,7 @@ function App() {
           </ResizablePanel>
           <ResizableHandle withHandle />
           <ResizablePanel minSize={40} style={{overflowY: 'auto'}}>
-            <section ref={htmlRef} className='sl-markdown-content'></section>
+            <section ref={htmlRef} className={app['sl-markdown-content']}></section>
           </ResizablePanel>
         </ResizablePanelGroup>
       </main>
