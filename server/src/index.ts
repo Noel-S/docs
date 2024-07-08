@@ -4,12 +4,12 @@ import { unlink } from "node:fs/promises";
 
 const app = new Hono()
 
-app.get('/edit/:filename{.+\\.mdx{0,1}$}', serveStatic({ root: '../base/dist/edit', path: '/index.html', rewriteRequestPath(path) {
+app.get('/edit/:filename{.+\\.mdx{0,1}$}', serveStatic({ root: '../dist/edit', path: '/index.html', rewriteRequestPath(path) {
   console.log(path)
   return path
 }, }))
 
-app.use('/*', serveStatic({ root: '../base/dist' }))
+app.use('/*', serveStatic({ root: '../dist' }))
 
 app.get('/content/:filename{.+\\.mdx{0,1}$}', async (c) => {
   const { filename } = c.req.param()
@@ -33,31 +33,10 @@ app.post('/save', async (c) => {
 app.post('/publish', async (c) => {
   try {
     // build editor and base
-    const { exited: baseBuildCode } = Bun.spawn(['npm', 'run', 'astro', 'build'], { cwd: '../base' })
+    const { exited: baseBuildCode } = Bun.spawn(['publish.sh'], { cwd: '../cmd' })
     const base = await baseBuildCode
     if (base !== 0) {
       return c.json({ status: 'error' })
-    }
-
-    const { exited: editorBuildCode } = Bun.spawn(['npm', 'run', 'build'], { cwd: '../editor' })
-    const editor = await editorBuildCode
-    if (editor !== 0) {
-      return c.json({ status: 'error' })
-    }
-
-    // publish to github
-    const { exited: gitAddCode } = Bun.spawn(['git', 'add', '.'], { cwd: '../' })
-    const gitAdd = await gitAddCode
-    if (gitAdd === 0) {
-      const { exited: gitCommitCode } = Bun.spawn(['git', 'commit', '-m', 'published docs files'], { cwd: '../' })
-      const gitCommit = await gitCommitCode
-      if (gitCommit === 0) {
-        const { exited: gitPushCode } = Bun.spawn(['git', 'push'], { cwd: '../' })
-        const gitPush = await gitPushCode
-        if (gitPush !== 0) {
-          return c.json({ status: 'error' })
-        }
-      }
     }
     return c.json({ status: 'ok' })
   } catch (error: any) {
