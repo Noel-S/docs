@@ -23,8 +23,18 @@ if [ "$arg" == "all" ]; then
   cp -r dist/* ../dist/edit/
 elif [ "$arg" == "base" ]; then
   cd ../base
+  # check if ../dist/edit/ exists and if exists copy the files to it
+  exist=false
+  if [ -d "../dist/edit/" ]; then
+    exist=true
+  fi
   npm run astro build > /dev/null
   echo "Base built"
+  if [ $exist ]; then
+    mkdir -p ../dist/edit/
+    cp -r ../editor/dist/* ../dist/edit/
+    echo "Editor copied to base"
+  fi
 elif [ "$arg" == "editor" ]; then
   cd ../editor
   npm run build > /dev/null
