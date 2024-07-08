@@ -21,3 +21,14 @@ const taxValue = total - (total / (1 + (percentage / 100)));
 
 console.log(taxValue)
 ```
+1. a
+2. b
+3. c
+
+- a
+- b
+- c
+
+- [ ] a
+- [ ] b
+- [ ] c
