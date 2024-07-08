@@ -1,3 +1,4 @@
+import { readableStreamToText } from 'bun';
 import { Hono } from 'hono'
 import { serveStatic } from 'hono/bun'
 import { unlink } from "node:fs/promises";
@@ -33,13 +34,14 @@ app.post('/save', async (c) => {
 app.post('/publish', async (c) => {
   try {
     // build editor and base
-    const { exited: baseBuildCode } = Bun.spawn(['publish.sh'], { cwd: '../cmd' })
+    const { exited: baseBuildCode } = Bun.spawn(['bash', './publish.sh'], { cwd: '../cmd' })
     const base = await baseBuildCode
     if (base !== 0) {
       return c.json({ status: 'error' })
     }
     return c.json({ status: 'ok' })
   } catch (error: any) {
+    console.error(error)
     return c.json({ status: 'error', error: error.message })
   }
 })
