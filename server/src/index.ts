@@ -1,4 +1,3 @@
-import { readableStreamToText } from 'bun';
 import { Hono } from 'hono'
 import { serveStatic } from 'hono/bun'
 import { unlink } from "node:fs/promises";
