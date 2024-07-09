@@ -7,7 +7,7 @@ description: A simple guide to help you pass your exams.
 
 ---
 
-## Siuuuuuuuuu
+## Heading number 1
 
 This site was built using [GitHub Pages](https://pages.github.com/).
 
@@ -22,11 +22,3 @@ const taxValue = total - (total / (1 + (percentage / 100)));
 console.log(taxValue)
 ```
 
-1. a
-2. b
-3. c
-
-- a
-- b
-- c
-- d
